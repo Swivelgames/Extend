@@ -68,7 +68,6 @@ var Extend = function(ChildClass, ParentClass) {
 };
 
 Extend.mergeObjects = function(host, obj, obj2, obj3, obj4) {
-	return jQuery.extend.apply(host,[true,host,obj2,obj]);
 	if (!host) host = {};
 
 	var l = arguments.length;
