@@ -17,7 +17,7 @@ var Extend = function(ChildClass, ParentClass) {
 		execParent = Array.prototype.pop.apply(arguments);
 	}
 
-	if (arguments<1) {
+	if (arguments.length<2) {
 		throw new TypeError("Must supply parent class to extend");
 	}
 
@@ -68,9 +68,8 @@ var Extend = function(ChildClass, ParentClass) {
 };
 
 Extend.mergeObjects = function(host, obj, obj2, obj3, obj4) {
-//	Array.prototype.splice.call(arguments,0,0,true);
 	return jQuery.extend.apply(host,[true,host,obj2,obj]);
-/*	if (!host) host = {};
+	if (!host) host = {};
 
 	var l = arguments.length;
 	if (l<2) { return host; }
@@ -90,18 +89,19 @@ Extend.mergeObjects = function(host, obj, obj2, obj3, obj4) {
 		);
 	}
 
-	return host;*/
+	return host;
 };
 
-Extend.defineProperties = function(obj, descriptorArr) {
+Extend.defineProperties = function(obj, descriptorArr, checkForClass) {
 	var objProps = Object.getOwnPropertyNames(obj);
 
 	for (var x in descriptorArr) {
+		if (checkForClass && (x=="parentClass"||x=="thisClass")) continue;
 		if (!descriptorArr.hasOwnProperty(x)) continue;
 
 		if (objProps.indexOf(x)>-1) {
 			var propDesc = Object.getOwnPropertyDescriptor(obj, x);
-			if (!propDesc.configurable) continue;
+			if (propDesc.configurable===false) continue;
 
 			if (Extend.isObjectLiteral(propDesc.value) && Extend.isObjectLiteral(descriptorArr[x].value)) {
 				descriptorArr[x].value = Extend.mergeObjects({},descriptorArr[x].value,propDesc.value);
@@ -160,19 +160,7 @@ Extend.mergePrototypes = function(child, parent) {
 };
 
 Extend.setProperties = function(obj, props) {
-	for (var i in props) {
-		if (i=="parentClass"||i=="thisClass") continue;
-
-		var prop = props[i];
-
-		if (!!~Object.getOwnPropertyNames(obj).indexOf(i)) {
-			if (obj[i] && obj[i].constructor === Object && prop.value && prop.value.constructor === Object) {
-				prop.value = Extend.mergeObjects({},prop.value,obj[i]);
-			}
-		}
-
-		Object.defineProperty(obj, i, prop);
-	}
+	return Extend.defineProperties(obj, props, true);
 };
 
 Extend.isObjectLiteral = function(obj){
